@@ -1,0 +1,55 @@
+#??? ??????
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://db_pg_15:5432/exampledb
+#    username: nikita
+#    password: 12345
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#  sql:
+#    init:
+#      mode: never
+#      data-locations: file:/app/resources/data.sql
+#
+
+
+#??? ?????? ? spring
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/SberProject
+    username: postgres
+    password: 3200558819
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+#  Настройки максимального размера загружаемого файла
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+#Настройки логирования
+logging:
+  level:
+    root: info
+  file:
+    name: logs/app.log
+    path: logs
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 10
+
+
+
