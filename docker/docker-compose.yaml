@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: "exampledb"
+      POSTGRES_USER: "nikita"
+      POSTGRES_PASSWORD: "12345"
+    ports:
+      - 5432:5432
+    volumes:
+      - "/var/lib/postgresql/data:/var/lib/postgresql/data:z"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/exampledb
+      SPRING_DATASOURCE_USERNAME: "nikita"
+      SPRING_DATASOURCE_PASSWORD: "12345"
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+

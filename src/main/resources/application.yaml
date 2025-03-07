@@ -1,4 +1,4 @@
-#??? ??????
+#Docker
 #spring:
 #  datasource:
 #    url: jdbc:postgresql://db_pg_15:5432/exampledb
@@ -15,10 +15,26 @@
 #    init:
 #      mode: never
 #      data-locations: file:/app/resources/data.sql
+#  #  Настройки максимального размера загружаемого файла
+#  servlet:
+#    multipart:
+#      max-file-size: 10MB
+#      max-request-size: 10MB
 #
+##Настройки логирования
+#logging:
+#  level:
+#    root: info
+#  file:
+#    name: logs/app.log
+#    path: logs
+#  logback:
+#    rollingpolicy:
+#      max-file-size: 10MB
+#      max-history: 10
 
 
-#??? ?????? ? spring
+#spring
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/SberProject

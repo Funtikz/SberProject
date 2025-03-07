@@ -27,4 +27,9 @@ public class User {
     private Set<String> roles;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserImage> userImages;
+
+    @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Service> userServices;
+
+
 }

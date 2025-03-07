@@ -1,15 +1,15 @@
 # Этап сборки
-FROM maven:3.9.4-eclipse-temurin-17 as build
+FROM maven:3.9.4-eclipse-temurin-21 as build
 
-COPY src /app/src
-COPY pom.xml /app/pom.xml
+COPY /src /app/src
+COPY /pom.xml /app/pom.xml
 
 WORKDIR /app
 
 RUN mvn clean package -DskipTests
 
 # Этап запуска
-FROM bellsoft/liberica-openjdk-debian:17
+FROM bellsoft/liberica-openjdk-debian:21
 
 RUN adduser --system spring-boot && addgroup --system spring-boot && adduser spring-boot spring-boot
 
