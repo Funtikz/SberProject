@@ -6,13 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "service")
-public class Service {
+public class ServiceDeal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,6 +30,8 @@ public class Service {
 
     private Category awaitingCategoryService;
 
-    private String awaitCategoryService;
+    private String awaitCategoryDescription;
+
+    private LocalDateTime dateOfPublication;
 
 }

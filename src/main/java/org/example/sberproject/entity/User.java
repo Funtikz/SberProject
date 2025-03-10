@@ -29,7 +29,7 @@ public class User {
     private List<UserImage> userImages;
 
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Service> userServices;
+    private List<ServiceDeal> userServices;
 
 
 }

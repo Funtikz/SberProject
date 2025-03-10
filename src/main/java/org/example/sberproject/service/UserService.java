@@ -118,7 +118,7 @@ public class UserService {
         log.info("Дефолтная картинка пользователю установлена");
     }
 
-    public UserDto findByPhoneNumber(String number){
+    public User findByPhoneNumber(String number){
         User user = userRepository.findByPhoneNumber(number).orElseThrow(
                 () ->{
                     String errorMessage = "Пользователь с номером телефона:  " + number + "не найден";
@@ -126,13 +126,13 @@ public class UserService {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
                 }
         );
-        return toDto(user);
+        return user;
     }
 
     public User getCurrentUser(Object principal) {
         if (principal instanceof UserDetails userDetails) {
             String phoneNumber = userDetails.getUsername();
-            return toUser(findByPhoneNumber(phoneNumber));
+            return findByPhoneNumber(phoneNumber);
         }
         else {
             log.error("Пользователь не авторизован не найден JWT токен");
@@ -150,6 +150,15 @@ public class UserService {
     }
 
 
+    public User findById(Long userId){
+        return userRepository.findById(userId).orElseThrow(
+                () ->{
+                    String errorMessage = "Пользователь с id:  " + userId + "не найден";
+                    log.error(errorMessage, new UsernameNotFoundException(errorMessage));
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+                }
+        );
+    }
 
     public User RegistrationDtotoUser(UserRegistrationDto userDto){
         User user = new User();
