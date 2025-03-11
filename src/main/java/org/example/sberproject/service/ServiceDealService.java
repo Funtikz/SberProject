@@ -5,12 +5,12 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.sberproject.dto.service.AuthServiceDealResponseDto;
-import org.example.sberproject.dto.service.NotAuthServiceResponseDto;
+import org.example.sberproject.dto.service.NotAuthServiceDealResponseDto;
 import org.example.sberproject.dto.service.ServiceDealRequestDto;
 import org.example.sberproject.entity.Category;
 import org.example.sberproject.entity.ServiceDeal;
 import org.example.sberproject.entity.User;
-import org.example.sberproject.exceptions.UsernameNotFoundException;
+import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.ServiceDealRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -75,11 +75,7 @@ public class ServiceDealService {
 
     @Transactional
     public AuthServiceDealResponseDto updateService(Long serviceId, ServiceDealRequestDto requestDto) {
-        ServiceDeal service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> {
-                    log.error("Услуга с ID {} не существует", serviceId);
-                    return new UsernameNotFoundException("Услуга с таким ID не найдена");
-                });
+        ServiceDeal service = findById(serviceId);
         User user = userService.findById(requestDto.getUserId());
         service.setApplicant(user);
         service.setCategoryService(requestDto.getCategoryService());
@@ -91,6 +87,13 @@ public class ServiceDealService {
         return toAuthDto(updatedService);
     }
 
+    public ServiceDeal findById(Long serviceId){
+        return serviceRepository.findById(serviceId)
+                .orElseThrow(() -> {
+                    log.error("Услуга с ID {} не существует", serviceId);
+                    return new ServiceNotFoundException("Услуги с ID" + serviceId + "не существует");
+                });
+    }
 
 
     private AuthServiceDealResponseDto toAuthDto(ServiceDeal entity) {
@@ -109,8 +112,8 @@ public class ServiceDealService {
     }
 
 
-    private NotAuthServiceResponseDto toNotAuthDto(ServiceDeal entity) {
-        NotAuthServiceResponseDto dto = new NotAuthServiceResponseDto();
+    private NotAuthServiceDealResponseDto toNotAuthDto(ServiceDeal entity) {
+        NotAuthServiceDealResponseDto dto = new NotAuthServiceDealResponseDto();
         dto.setId(entity.getId());
         dto.setCategoryService(entity.getCategoryService());
         dto.setDescriptionService(entity.getDescriptionService());

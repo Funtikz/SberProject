@@ -6,7 +6,7 @@ import org.example.sberproject.entity.Category;
 import java.time.LocalDateTime;
 
 @Data
-public class NotAuthServiceResponseDto {
+public class NotAuthServiceDealResponseDto {
     private Long id;
     private Category categoryService;
     private String descriptionService;

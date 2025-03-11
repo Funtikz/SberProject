@@ -154,4 +154,26 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(body, ex.getStatusCode());
     }
+
+    @ExceptionHandler(ServiceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleServiceNotFoundException(ResponseStatusException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", ex.getMessage());
+        body.put("message", ex.getReason());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(body, ex.getStatusCode());
+    }
+
+    @ExceptionHandler(FavoriteException.class)
+    public ResponseEntity<Map<String, Object>> handleFavoriteException(ResponseStatusException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("error", ex.getMessage());
+        body.put("message", ex.getReason());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(body, ex.getStatusCode());
+    }
 }
