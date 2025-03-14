@@ -34,4 +34,9 @@ public class AuthController {
         return  new ResponseEntity<>(userService.toDto(userService.getCurrentUser(principal)), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> handleOptions() {
+        return ResponseEntity.ok().build();
+    }
+
 }

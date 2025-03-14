@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @Data
@@ -35,16 +36,16 @@ public class ServiceDealService {
 
     }
 
-    public Page<NotAuthServiceDealResponseDto> getServicesByCategory(Category category, Pageable pageable) {
-        return serviceRepository.findByCategoryService(category, pageable).map(this::toNotAuthDto);
+    public Page<NotAuthServiceDealResponseDto> getServicesByCategory(List<Category> category, Pageable pageable) {
+        return serviceRepository.findByCategoryServiceIn(category, pageable).map(this::toNotAuthDto);
     }
 
-    public Page<AuthServiceDealResponseDto> getMyServices(Pageable pageable) {
+    public Page<NotAuthServiceDealResponseDto> getMyServices(Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String login = authentication.getName();
         User currentUser = userService.findByPhoneNumber(login);
         return serviceRepository.findByApplicant(currentUser, pageable)
-                .map(this::toAuthDto);
+                .map(this::toNotAuthDto);
     }
 
     @Transactional

@@ -89,23 +89,33 @@ class ServiceServiceTest {
     @Test
     void getServicesByCategory_Successful() {
         Pageable pageable = Pageable.ofSize(10);
-        Long serviceId = 1L;
+        Long serviceId1 = 1L;
+        Long serviceId2 = 2L;
+
         ServiceDeal service1 = new ServiceDeal();
-        service1.setId(serviceId);
+        service1.setId(serviceId1);
         service1.setApplicant(testUser);
         service1.setCategoryService(Category.IT);
-        service1.setDescriptionService("Просто пример");
+        service1.setDescriptionService("IT услуга");
 
-        List<ServiceDeal> serviceDeals = List.of(service1);
+        ServiceDeal service2 = new ServiceDeal();
+        service2.setId(serviceId2);
+        service2.setApplicant(testUser);
+        service2.setCategoryService(Category.DESIGN);
+        service2.setDescriptionService("Дизайн услуга");
+
+        List<Category> categoryList = List.of(Category.IT, Category.DESIGN);
+        List<ServiceDeal> serviceDeals = List.of(service1, service2);
 
         Page<ServiceDeal> page = new PageImpl<>(serviceDeals, pageable, serviceDeals.size());
 
-        when(repository.findByCategoryService(Category.IT,pageable)).thenReturn(page);
+        when(repository.findByCategoryServiceIn(categoryList, pageable)).thenReturn(page);
 
-        Page<NotAuthServiceDealResponseDto> result = service.getServicesByCategory(Category.IT, pageable);
+        Page<NotAuthServiceDealResponseDto> result = service.getServicesByCategory(categoryList, pageable);
 
-        assertEquals(1, result.getContent().size());
-
+        assertEquals(2, result.getContent().size());
+        assertEquals(Category.IT, result.getContent().get(0).getCategoryService());
+        assertEquals(Category.DESIGN, result.getContent().get(1).getCategoryService());
     }
 
     // TODO Переделать тест исходя из SpringContextHolder

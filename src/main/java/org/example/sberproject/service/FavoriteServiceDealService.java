@@ -36,6 +36,10 @@ public class FavoriteServiceDealService {
             log.error("Услуга с ID: " + serviceId + "уже в избранном");
             throw  new FavoriteException("Услуга с ID: " + serviceId + "уже в избранном");
         }
+        if (serviceDeal.getApplicant().getId().equals(user.getId())){
+            log.error("Нельзя добавить свою услугу в избранное!");
+            throw new FavoriteException("Нельзя добавить свою услугу в избранное!");
+        }
         log.info("Услуга добавлена в избранное");
         return repository.save(favoriteServiceDeal);
     }

@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/services")
 @RequiredArgsConstructor
@@ -27,16 +29,16 @@ public class ServiceDealController {
         return ResponseEntity.ok(services);
     }
 
-    @GetMapping("/category/{category}")
-    public ResponseEntity<Page<NotAuthServiceDealResponseDto>> getServicesByCategory(
-            @PathVariable Category category, Pageable pageable) {
-        Page<NotAuthServiceDealResponseDto> services = service.getServicesByCategory(category, pageable);
+    @GetMapping("/category")
+    public ResponseEntity<Page<NotAuthServiceDealResponseDto>> getServicesByCategories(
+            @RequestParam List<Category> categories, Pageable pageable) {
+        Page<NotAuthServiceDealResponseDto> services = service.getServicesByCategory(categories, pageable);
         return ResponseEntity.ok(services);
     }
 
     @GetMapping("my-services")
-    public ResponseEntity<Page<AuthServiceDealResponseDto>> getMyServices(Pageable pageable){
-        Page<AuthServiceDealResponseDto> myServices = service.getMyServices(pageable);
+    public ResponseEntity<Page<NotAuthServiceDealResponseDto>> getMyServices(Pageable pageable){
+        Page<NotAuthServiceDealResponseDto> myServices = service.getMyServices(pageable);
         return  ResponseEntity.ok(myServices);
     }
 
