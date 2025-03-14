@@ -26,6 +26,10 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserRating rating;
+
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> roles;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -36,6 +40,7 @@ public class User {
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(FetchMode.SUBSELECT)
     private List<ServiceDeal> userServices;
+
 
 
 }

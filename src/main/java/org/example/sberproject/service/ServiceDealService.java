@@ -30,23 +30,12 @@ public class ServiceDealService {
     private final ServiceDealRepository serviceRepository;
     private final UserService userService;
 
-    public Page<?> getAllServices(Pageable pageable){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
-        if (isAuthenticated){
-            return serviceRepository.findAll(pageable).map(this::toAuthDto);
-        }
+    public Page<NotAuthServiceDealResponseDto> getAllServices(Pageable pageable){
         return serviceRepository.findAll(pageable).map(this::toNotAuthDto);
 
     }
 
-    public Page<?> getServicesByCategory(Category category, Pageable pageable) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
-        if (isAuthenticated){
-            return serviceRepository.findByCategoryService(category, pageable)
-                    .map(this::toAuthDto);
-        }
+    public Page<NotAuthServiceDealResponseDto> getServicesByCategory(Category category, Pageable pageable) {
         return serviceRepository.findByCategoryService(category, pageable).map(this::toNotAuthDto);
     }
 
@@ -60,13 +49,15 @@ public class ServiceDealService {
 
     @Transactional
     public AuthServiceDealResponseDto createService(ServiceDealRequestDto requestDto) {
-        User user = userService.findById(requestDto.getUserId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String login = authentication.getName();
+        User user = userService.findByPhoneNumber(login);
         ServiceDeal service = new ServiceDeal();
         service.setApplicant(user);
         service.setCategoryService(requestDto.getCategoryService());
         service.setDescriptionService(requestDto.getDescriptionService());
         service.setAwaitingCategoryService(requestDto.getAwaitingCategoryService());
-        service.setAwaitCategoryDescription(requestDto.getAwaitCategoryDescription());
+        service.setAwaitDescriptionService(requestDto.getAwaitDescriptionService());
         service.setDateOfPublication(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
         ServiceDeal save = serviceRepository.save(service);
         log.info("Заявка с пользователем " + user.getId() + " создана");
@@ -76,15 +67,27 @@ public class ServiceDealService {
     @Transactional
     public AuthServiceDealResponseDto updateService(Long serviceId, ServiceDealRequestDto requestDto) {
         ServiceDeal service = findById(serviceId);
-        User user = userService.findById(requestDto.getUserId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String login = authentication.getName();
+        User user = userService.findByPhoneNumber(login);
         service.setApplicant(user);
         service.setCategoryService(requestDto.getCategoryService());
         service.setDescriptionService(requestDto.getDescriptionService());
         service.setAwaitingCategoryService(requestDto.getAwaitingCategoryService());
-        service.setAwaitCategoryDescription(requestDto.getAwaitCategoryDescription());
+        service.setAwaitDescriptionService(requestDto.getAwaitDescriptionService());
         service.setDateOfPublication(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
         ServiceDeal updatedService = serviceRepository.save(service);
         return toAuthDto(updatedService);
+    }
+
+    @Transactional
+    public void deleteService(Long serviceId){
+        ServiceDeal serviceDeal = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> {
+                    log.error("Услуга с ID {} не существует", serviceId);
+                    return new ServiceNotFoundException("Услуги с ID" + serviceId + "не существует");
+                });
+        serviceRepository.delete(serviceDeal);
     }
 
     public ServiceDeal findById(Long serviceId){
@@ -96,13 +99,13 @@ public class ServiceDealService {
     }
 
 
-    private AuthServiceDealResponseDto toAuthDto(ServiceDeal entity) {
+    public AuthServiceDealResponseDto toAuthDto(ServiceDeal entity) {
         AuthServiceDealResponseDto dto = new AuthServiceDealResponseDto();
         dto.setId(entity.getId());
         dto.setCategoryService(entity.getCategoryService());
         dto.setDescriptionService(entity.getDescriptionService());
         dto.setAwaitingCategoryService(entity.getAwaitingCategoryService());
-        dto.setAwaitCategoryDescription(entity.getAwaitCategoryDescription());
+        dto.setAwaitDescriptionService(entity.getAwaitDescriptionService());
         dto.setUserId(entity.getApplicant().getId());
         dto.setPhoneNumber(entity.getApplicant().getPhoneNumber());
         dto.setEmail(entity.getApplicant().getEmail());
@@ -112,13 +115,13 @@ public class ServiceDealService {
     }
 
 
-    private NotAuthServiceDealResponseDto toNotAuthDto(ServiceDeal entity) {
+    public NotAuthServiceDealResponseDto toNotAuthDto(ServiceDeal entity) {
         NotAuthServiceDealResponseDto dto = new NotAuthServiceDealResponseDto();
         dto.setId(entity.getId());
         dto.setCategoryService(entity.getCategoryService());
         dto.setDescriptionService(entity.getDescriptionService());
         dto.setAwaitingCategoryService(entity.getAwaitingCategoryService());
-        dto.setAwaitCategoryDescription(entity.getAwaitCategoryDescription());
+        dto.setAwaitDescriptionService(entity.getAwaitDescriptionService());
         dto.setDateOfPublication(entity.getDateOfPublication());
 
         return dto;

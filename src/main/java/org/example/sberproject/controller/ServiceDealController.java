@@ -3,12 +3,14 @@ package org.example.sberproject.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.sberproject.dto.service.NotAuthServiceDealResponseDto;
 import org.example.sberproject.dto.service.ServiceDealRequestDto;
 import org.example.sberproject.dto.service.AuthServiceDealResponseDto;
 import org.example.sberproject.entity.Category;
 import org.example.sberproject.service.ServiceDealService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,15 +22,15 @@ public class ServiceDealController {
     private final ServiceDealService service;
 
     @GetMapping("/get-all")
-    public ResponseEntity<Page<?>> getAllServices(Pageable pageable) {
-        Page<?> services = service.getAllServices(pageable);
+    public ResponseEntity<Page<NotAuthServiceDealResponseDto>> getAllServices(Pageable pageable) {
+        Page<NotAuthServiceDealResponseDto> services = service.getAllServices(pageable);
         return ResponseEntity.ok(services);
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<Page<?>> getServicesByCategory(
+    public ResponseEntity<Page<NotAuthServiceDealResponseDto>> getServicesByCategory(
             @PathVariable Category category, Pageable pageable) {
-        Page<?> services = service.getServicesByCategory(category, pageable);
+        Page<NotAuthServiceDealResponseDto> services = service.getServicesByCategory(category, pageable);
         return ResponseEntity.ok(services);
     }
 
@@ -52,4 +54,9 @@ public class ServiceDealController {
         return ResponseEntity.ok(result);
     }
 
+    @DeleteMapping("/delete/{serviceId}")
+    public ResponseEntity<String> deleteService(@PathVariable("serviceId") Long serviceId){
+        service.deleteService(serviceId);
+        return  new ResponseEntity<>("Услуга успешно удалена!", HttpStatus.OK);
+    }
 }

@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.example.sberproject.dto.user.UserAuthDto;
-import org.example.sberproject.dto.user.UserDto;
+import org.example.sberproject.dto.user.UserResponseDto;
 import org.example.sberproject.dto.user.UserRegistrationDto;
 import org.example.sberproject.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -25,12 +25,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDto> login(@RequestBody UserAuthDto userCredentialDto , HttpServletResponse response) {
+    public ResponseEntity<UserResponseDto> login(@RequestBody UserAuthDto userCredentialDto , HttpServletResponse response) {
         return new ResponseEntity<>(userService.login(userCredentialDto, response), HttpStatus.OK);
     }
 
     @GetMapping("/current-user")
-    public ResponseEntity<UserDto> getCurrentUser(@AuthenticationPrincipal Object principal) {
+    public ResponseEntity<UserResponseDto> getCurrentUser(@AuthenticationPrincipal Object principal) {
         return  new ResponseEntity<>(userService.toDto(userService.getCurrentUser(principal)), HttpStatus.OK);
     }
 

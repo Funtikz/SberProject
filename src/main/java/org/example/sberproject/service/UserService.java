@@ -6,10 +6,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.sberproject.dto.user.UserAuthDto;
-import org.example.sberproject.dto.user.UserDto;
+import org.example.sberproject.dto.user.UserRatingDto;
+import org.example.sberproject.dto.user.UserResponseDto;
 import org.example.sberproject.dto.user.UserRegistrationDto;
 import org.example.sberproject.entity.User;
 import org.example.sberproject.entity.UserImage;
+import org.example.sberproject.entity.UserRating;
 import org.example.sberproject.exceptions.*;
 import org.example.sberproject.repository.UserImageRepository;
 import org.example.sberproject.repository.UserRepository;
@@ -38,7 +40,7 @@ public class UserService {
 
 
     //Вход для User и установка в куки
-    public UserDto login(UserAuthDto userCredentialDto, HttpServletResponse response){
+    public UserResponseDto login(UserAuthDto userCredentialDto, HttpServletResponse response){
         // 1. Ищем пользователя по номеру телефона
         log.info("Поиск пользователя по номеру телефона");
         String number = userCredentialDto.getPhoneNumber();
@@ -60,7 +62,7 @@ public class UserService {
 
                 // 5. Добавляем куки в response
                 response.addCookie(jwtCookie);
-                UserDto dto = toDto(user);
+                UserResponseDto dto = toDto(user);
                 log.info("JWT добавлена в куки");
                 return dto;
             }else {
@@ -93,6 +95,11 @@ public class UserService {
         }
         entity.setRoles(userDto.getRoles());
         entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+        UserRating rating = new UserRating();
+        rating.setSuccessfulExchanges(0);
+        rating.setRating(0.0);
+        rating.setUser(entity);
+        entity.setRating(rating);
         User currentUser = userRepository.save(entity);
         setDefaultImage(currentUser);
 
@@ -145,8 +152,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto updateUser(UserDto userDto){
-        return toDto(userRepository.save(toUser(userDto)));
+    public UserResponseDto updateUser(UserResponseDto userResponseDto){
+        return toDto(userRepository.save(toUser(userResponseDto)));
     }
 
 
@@ -185,30 +192,38 @@ public class UserService {
         return userDto;
     }
 
-    public UserDto toDto(User user){
-        UserDto userDto = new UserDto();
-        userDto.setFirstName(user.getFirstName());
-        userDto.setLastName(user.getLastName());
-        userDto.setRoles(user.getRoles());
-        userDto.setId(user.getId());
-        userDto.setPhoneNumber(user.getPhoneNumber());
-        userDto.setId(user.getId());
-        userDto.setPassword(user.getPassword());
-        userDto.setEmail(user.getEmail());
-        return userDto;
+    public UserResponseDto toDto(User user){
+        UserResponseDto userResponseDto = new UserResponseDto();
+        userResponseDto.setFirstName(user.getFirstName());
+        userResponseDto.setLastName(user.getLastName());
+        userResponseDto.setRoles(user.getRoles());
+        userResponseDto.setId(user.getId());
+        userResponseDto.setPhoneNumber(user.getPhoneNumber());
+        userResponseDto.setId(user.getId());
+        userResponseDto.setPassword(user.getPassword());
+        userResponseDto.setEmail(user.getEmail());
+        userResponseDto.setRating(toDto(user.getRating()));
+        return userResponseDto;
     }
 
-    public User toUser(UserDto userDto){
+    public User toUser(UserResponseDto userResponseDto){
         User user = new User();
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setRoles(userDto.getRoles());
-        user.setId(userDto.getId());
-        user.setPhoneNumber(userDto.getPhoneNumber());
-        user.setPassword(userDto.getPassword());
-        user.setEmail(userDto.getEmail());
+        user.setFirstName(userResponseDto.getFirstName());
+        user.setLastName(userResponseDto.getLastName());
+        user.setRoles(userResponseDto.getRoles());
+        user.setId(userResponseDto.getId());
+        user.setPhoneNumber(userResponseDto.getPhoneNumber());
+        user.setPassword(userResponseDto.getPassword());
+        user.setEmail(userResponseDto.getEmail());
         return  user;
     }
 
+    public UserRatingDto toDto(UserRating entity){
+        UserRatingDto dto = new UserRatingDto();
+        dto.setId(entity.getId());
+        dto.setRating(entity.getRating());
+        dto.setSuccessfulExchanges(entity.getSuccessfulExchanges());
+        return dto;
+    }
 
 }

@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleMappingException(MappingException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());// Добавлено значение статуса
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("error", "Internal Server Error");
         body.put("message", ex.getMessage());
         body.put("path", request.getDescription(false).replace("uri=", ""));
@@ -121,7 +121,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUsernameNotFoundException(AuthenticationException ex, WebRequest request) {
+    public ResponseEntity<Map<String, Object>> handleUsernameNotFoundException(UsernameNotFoundException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.NOT_FOUND.value());
@@ -136,7 +136,6 @@ public class GlobalExceptionHandler {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", ex.getMessage());
         body.put("message", ex.getReason());
         body.put("path", request.getDescription(false).replace("uri=", ""));
 
@@ -144,36 +143,43 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserImageProfileNotFound.class)
-    public ResponseEntity<Map<String, Object>> handleUserImageNotFoundException(ResponseStatusException ex, WebRequest request) {
+    public ResponseEntity<Map<String, Object>> handleUserImageNotFoundException(UserImageProfileNotFound ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", ex.getMessage());
-        body.put("message", ex.getReason());
+        body.put("message", ex.getMessage());
         body.put("path", request.getDescription(false).replace("uri=", ""));
 
-        return new ResponseEntity<>(body, ex.getStatusCode());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ServiceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleServiceNotFoundException(ResponseStatusException ex, WebRequest request) {
+    public ResponseEntity<Map<String, Object>> handleServiceNotFoundException(ServiceNotFoundException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", ex.getMessage());
-        body.put("message", ex.getReason());
+        body.put("message", ex.getMessage());
         body.put("path", request.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, ex.getStatusCode());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(FavoriteException.class)
-    public ResponseEntity<Map<String, Object>> handleFavoriteException(ResponseStatusException ex, WebRequest request) {
+    public ResponseEntity<Map<String, Object>> handleFavoriteException(FavoriteException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.CONFLICT.value());
-        body.put("error", ex.getMessage());
-        body.put("message", ex.getReason());
+        body.put("message", ex.getMessage());
         body.put("path", request.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, ex.getStatusCode());
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ResponseException.class)
+    public ResponseEntity<Map<String, Object>> handleReException(ResponseException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 }
