@@ -51,7 +51,7 @@ class JwtServiceTest {
 
     @Test
     void getEmailFromToken_ValidToken_ReturnsCorrectEmail() {
-        String email = "test@example.com"; // Установите email, который будет subject
+        String email = "test@example.com";
         Set<String> roles = new HashSet<>();
         roles.add("ROLE_USER");
 

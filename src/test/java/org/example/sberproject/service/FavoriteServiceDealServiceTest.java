@@ -4,6 +4,7 @@ import org.example.sberproject.entity.FavoriteServiceDeal;
 import org.example.sberproject.entity.ServiceDeal;
 import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.FavoriteException;
+import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.FavoriteServiceDealRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -15,11 +16,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -66,10 +65,13 @@ class FavoriteServiceDealServiceTest {
         user.setId(userId);
         user.setFirstName("Никита");
 
+        User otherUser = new User();
+        otherUser.setId(2L);
+        otherUser.setPhoneNumber("+79882505363");
+
         ServiceDeal serviceDeal = new ServiceDeal();
         serviceDeal.setId(serviceId);
-        serviceDeal.setApplicant(user);
-
+        serviceDeal.setApplicant(otherUser);
         when(authentication.getName()).thenReturn(phoneNumber);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
@@ -91,6 +93,7 @@ class FavoriteServiceDealServiceTest {
         assertEquals(phoneNumber, favoriteServiceDeal.getUser().getPhoneNumber());
         assertEquals(serviceDeal, favoriteServiceDeal.getServiceDeal());
     }
+
 
     @Test
     void addToFavorite_ThrowFavoriteException(){
@@ -187,13 +190,11 @@ class FavoriteServiceDealServiceTest {
         when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(dealService.findById(serviceId)).thenReturn(serviceDeal);
 
-        when(repository.findFavoriteServiceDealByUserAndServiceDeal(user, serviceDeal))
-                .thenReturn(Optional.empty());
+        when(repository.findFavoriteServiceDealByUserAndServiceDeal(user, serviceDeal)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> favoriteService.deleteFromFavorites(serviceId));
-
-        verify(repository, times(0)).delete(any(FavoriteServiceDeal.class));
+        assertThrows(ServiceNotFoundException.class, () -> favoriteService.deleteFromFavorites(serviceId));
     }
+
 
     @Test
     void findFavoriteServices_Successful() {
@@ -262,5 +263,94 @@ class FavoriteServiceDealServiceTest {
 
         assertNotNull(favoriteServices);
         assertTrue(favoriteServices.isEmpty());
+    }
+
+    @Test
+    void addToFavorite_ServiceNotFound() {
+        Long serviceId = 1L;
+        String phoneNumber = "+79882505362";
+        Long userId = 1L;
+
+        User user = new User();
+        user.setPhoneNumber(phoneNumber);
+        user.setId(userId);
+        user.setFirstName("Никита");
+
+        when(authentication.getName()).thenReturn(phoneNumber);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(dealService.findById(serviceId)).thenThrow(ServiceNotFoundException.class);
+
+        assertThrows(ServiceNotFoundException.class, () -> favoriteService.addToFavorite(serviceId));
+    }
+
+    @Test
+    void deleteFromFavorites_FavoriteServiceDealNotFound() {
+        Long serviceId = 1L;
+        String phoneNumber = "+79882505362";
+        Long userId = 1L;
+
+        User user = new User();
+        user.setPhoneNumber(phoneNumber);
+        user.setId(userId);
+        user.setFirstName("Никита");
+
+        ServiceDeal serviceDeal = new ServiceDeal();
+        serviceDeal.setId(serviceId);
+        serviceDeal.setApplicant(user);
+
+        when(authentication.getName()).thenReturn(phoneNumber);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(dealService.findById(serviceId)).thenReturn(serviceDeal);
+
+        // Мокаем ситуацию, когда сервис не найден в избранных
+        when(repository.findFavoriteServiceDealByUserAndServiceDeal(user, serviceDeal)).thenReturn(Optional.empty());
+
+        // Проверяем, что выбрасывается исключение ServiceNotFoundException
+        assertThrows(ServiceNotFoundException.class, () -> favoriteService.deleteFromFavorites(serviceId));
+    }
+
+    @Test
+    void findFavoriteServices_UserNotFound() {
+        String phoneNumber = "+79882505362";
+
+        when(authentication.getName()).thenReturn(phoneNumber);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(null);
+
+        List<ServiceDeal> favoriteServices = favoriteService.findFavoriteServices();
+        assertNotNull(favoriteServices);
+        assertTrue(favoriteServices.isEmpty());
+
+        verify(userService, times(1)).findByPhoneNumber(phoneNumber);
+    }
+
+    @Test
+    void findFavoriteServices_FavoritesException() {
+        Long userId = 1L;
+        String phoneNumber = "+79882505362";
+
+        User user = new User();
+        user.setPhoneNumber(phoneNumber);
+        user.setId(userId);
+        user.setFirstName("Никита");
+
+        when(authentication.getName()).thenReturn(phoneNumber);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(repository.findFavoriteServiceDealByUser(user)).thenThrow(new RuntimeException("Database error"));
+
+        assertThrows(RuntimeException.class, () -> favoriteService.findFavoriteServices());
+
+        verify(repository, times(1)).findFavoriteServiceDealByUser(user);
     }
 }

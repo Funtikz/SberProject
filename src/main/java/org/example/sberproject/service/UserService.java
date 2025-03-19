@@ -130,7 +130,7 @@ public class UserService {
                 () ->{
                     String errorMessage = "Пользователь с номером телефона:  " + number + "не найден";
                     log.error(errorMessage, new UsernameNotFoundException(errorMessage));
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
+                    return new UsernameNotFoundException("Пользователь не найден");
                 }
         );
         return user;

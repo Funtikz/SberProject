@@ -5,11 +5,13 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.sberproject.dto.service.ServiceResponseDto;
-import org.example.sberproject.entity.*;
+import org.example.sberproject.entity.ResponseStatus;
+import org.example.sberproject.entity.ServiceDeal;
+import org.example.sberproject.entity.ServiceResponse;
+import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.ResponseException;
 import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.ServiceResponseRepository;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +32,7 @@ public class ServiceResponseService {
     private final ServiceDealService dealService;
     private final JavaMailSender emailSender;
     private final ServiceDealService serviceDealService;
+    private final EmailService emailService;
 
 
     @Transactional
@@ -48,55 +51,15 @@ public class ServiceResponseService {
         User consumer = service.getUser();
         User producer = service.getServiceDeal().getApplicant();
         if (newStatus.equals(ResponseStatus.ACCEPTED)){
-            exchangeContactData(producer, consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
+            emailService.exchangeContactData(producer, consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
             // TODO Добавить изменение категории услуги, чтобы она не показывалась в новом поиске
         }
         else {
-            sendOfferRejectedNotification(consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
+            emailService.sendOfferRejectedNotification(consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
         }
-
-
     }
 
 
-    public void sendOfferRejectedNotification(User consumer, ServiceDeal serviceDeal, ServiceDeal offeredServiceDeal){
-        SimpleMailMessage messageConsumer = new SimpleMailMessage();
-        messageConsumer.setTo(consumer.getEmail());
-        messageConsumer.setSubject("Ваше предложение отклонили!" + serviceDeal.getDescriptionService());
-        messageConsumer.setText("Здравствуйте! Ранее вы откликались на услугу " + serviceDeal.getDescriptionService() + "\n" +
-                "Предлагали взамен: " + offeredServiceDeal.getDescriptionService()  + "\n" +
-                "к сожалению ваше предложение отклонили!");
-        emailSender.send(messageConsumer);
-    }
-
-    public void exchangeContactData(User producer, User consumer,
-                                    ServiceDeal serviceDeal, ServiceDeal offeredServiceDeal ){
-        SimpleMailMessage messageConsumer = new SimpleMailMessage();
-        messageConsumer.setTo(consumer.getEmail());
-        messageConsumer.setSubject("Ваше предложение приняли!" + serviceDeal.getDescriptionService());
-        messageConsumer.setText("Здравствуйте! Ранее вы откликались на услугу " + serviceDeal.getDescriptionService() + "\n" +
-                "Предлагали взамен: " + offeredServiceDeal.getDescriptionService()  + "\n" +
-                "ваше предложение приняли! Контактные данные для связи: "  + "\n" +
-                "Фамилия: " + producer.getLastName() + "\n" +
-                "Имя: " + producer.getFirstName() + "\n" +
-                "Почта: " + producer.getEmail() + "\n" +
-                "Номер телефона: " + producer.getPhoneNumber() + "\n"
-                + "Создатель услуги так же получил ваши контактные данные!");
-        emailSender.send(messageConsumer);
-
-        SimpleMailMessage messageProducer = new SimpleMailMessage();
-        messageProducer.setTo(producer.getEmail());
-        messageProducer.setSubject("Вы приняли сделку " + offeredServiceDeal.getDescriptionService() );
-        messageProducer.setText("Здравствуйте! Ранее вы создавали услугу " + serviceDeal.getDescriptionService()+ "\n" +
-                "Вы приняли следующее предложение: " + offeredServiceDeal.getDescriptionService() + "\n" +
-                "Контактные данные для связи: " + "\n" +
-                "Фамилия: " + consumer.getLastName() + "\n" +
-                "Имя: " + consumer.getFirstName() + "\n" +
-                "Почта: " + consumer.getEmail() + "\n" +
-                "Номер телефона: " + consumer.getPhoneNumber() + "\n"
-                + "Откликнувшийся участник так же получил ваши контактные данные!");
-        emailSender.send(messageProducer);
-    }
 
 
     public List<ServiceResponseDto> getAllMyResponse(){
@@ -143,35 +106,10 @@ public class ServiceResponseService {
         serviceResponse.setOfferedServiceDeal(offeredServiceDeal);
         serviceResponse.setUser(consumer);
         repository.save(serviceResponse);
-        sendEmailNotification(producer.getEmail(), consumer.getRating(),
+        emailService.sendEmailNotification(producer.getEmail(), consumer.getRating(),
                 serviceDeal, offeredServiceDeal, consumer.getFirstName(), consumer.getLastName());
         log.info("Вы откликнулись на услугу с ID: " + serviceId);
 
-    }
-
-
-    private void sendEmailNotification(String recipientEmail, UserRating rating,
-                                       ServiceDeal serviceDeal, ServiceDeal offeredServiceDeal , String firstName,
-                                       String lastName) {
-        if (recipientEmail == null || recipientEmail.isEmpty()) {
-            log.warn("У пользователя отсутствует email. Уведомление не отправлено.");
-            return;
-        }
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(recipientEmail);
-        message.setSubject("Новый отклик на вашу услугу!");
-        message.setText("Здравствуйте! На вашу услугу ' " + serviceDeal.getDescriptionService() + " '  откликнулся пользователь.\n" +
-                "Фамилия: " + lastName + "\n" +
-                "Имя: " + firstName + "\n" +
-                "Рейтинг: " + rating.getRating() + "\n" +
-                "Количество успешных обменов: " + rating.getRating() + "\n" +
-                "Его предложение взамен: " + "\n" +
-                "Категория услуги: " + offeredServiceDeal.getCategoryService()  + "\n" +
-                "Описание: " + offeredServiceDeal.getDescriptionService() + "\n" +
-                "Пожалуйста примите или отклоните данную заявку в приложении!");
-
-        emailSender.send(message);
     }
 
     private ServiceResponseDto mapToDto(ServiceResponse serviceResponse) {

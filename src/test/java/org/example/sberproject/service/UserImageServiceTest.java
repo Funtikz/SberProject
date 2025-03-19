@@ -5,7 +5,6 @@ import org.example.sberproject.entity.UserImage;
 import org.example.sberproject.exceptions.FileIsEmpty;
 import org.example.sberproject.exceptions.UserImageProfileNotFound;
 import org.example.sberproject.repository.UserImageRepository;
-import org.example.sberproject.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,9 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class UserImageServiceTest {
@@ -34,17 +31,13 @@ class UserImageServiceTest {
     @MockitoBean
     UserImageRepository userImageRepository;
 
-    @MockitoBean
-    UserRepository userRepository;
-
     @AfterEach
     void afterEach() {
         Mockito.reset(userImageRepository);
-        Mockito.reset(userRepository);
     }
 
     @Test
-    void findUserImageById_SuccessfulReturnUserImage(){
+    void findUserImageById_Success() {
         Long userImageId = 1L;
         UserImage expected = new UserImage();
         expected.setId(userImageId);
@@ -57,21 +50,18 @@ class UserImageServiceTest {
     }
 
     @Test
-    void findUserImageById_ThrowsResponseStatusException(){
+    void findUserImageById_ThrowsResponseStatusException() {
         Long userImageId = 1L;
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> {
-            userImageService.findUserImageById(userImageId);
-        });
+        assertThrows(ResponseStatusException.class, () -> userImageService.findUserImageById(userImageId));
     }
 
     @Test
-    void changeProfileImage_SuccessfulImageChange() throws IOException {
+    void changeProfileImage_Success() throws IOException {
         Long userImageId = 1L;
-        String content = "test image content";
-        byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
+        byte[] contentBytes = "test image content".getBytes(StandardCharsets.UTF_8);
 
         UserImage existingUserImage = new UserImage();
         existingUserImage.setId(userImageId);
@@ -89,32 +79,30 @@ class UserImageServiceTest {
 
         userImageService.changeProfileImage(imageUploadDto);
 
-        assertEquals(contentBytes, existingUserImage.getProfileImage());
+        assertArrayEquals(contentBytes, existingUserImage.getProfileImage());
     }
 
     @Test
-    void changeProfileImage_ThrowsFileIsEmptyException() throws IOException {
+    void changeProfileImage_ThrowsFileIsEmptyException() {
         Long userImageId = 1L;
+
 
         UserImage existingUserImage = new UserImage();
         existingUserImage.setId(userImageId);
 
-        when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
-
         MultipartFile mockMultipartFile = mock(MultipartFile.class);
         when(mockMultipartFile.isEmpty()).thenReturn(true);
+        when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
 
         ImageUploadDto imageUploadDto = new ImageUploadDto();
         imageUploadDto.setId(userImageId);
         imageUploadDto.setImage(mockMultipartFile);
 
-        assertThrows(FileIsEmpty.class, () ->{
-            userImageService.changeProfileImage(imageUploadDto);
-        });
+        assertThrows(FileIsEmpty.class, () -> userImageService.changeProfileImage(imageUploadDto));
     }
 
     @Test
-    void changeProfileImage_ThrowsRunTimeException() throws IOException {
+    void changeProfileImage_ThrowsIOException() throws IOException {
         Long userImageId = 1L;
 
         UserImage existingUserImage = new UserImage();
@@ -124,75 +112,92 @@ class UserImageServiceTest {
         when(mockMultipartFile.isEmpty()).thenReturn(false);
         when(mockMultipartFile.getBytes()).thenThrow(new IOException());
 
-        ImageUploadDto uploadDto = new ImageUploadDto();
-        uploadDto.setId(userImageId);
+        ImageUploadDto imageUploadDto = new ImageUploadDto();
+        imageUploadDto.setId(userImageId);
+        imageUploadDto.setImage(mockMultipartFile);
 
+        when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
 
-
-        assertThrows(RuntimeException.class, () ->{
-            userImageService.changeProfileImage(uploadDto);
-        });
+        assertThrows(RuntimeException.class, () -> userImageService.changeProfileImage(imageUploadDto));
     }
 
     @Test
-    void deleteProfileImageAndUploadDefault_SuccessfulDeleteAndReplace() {
+    void deleteProfileImageAndUploadDefault_Success() {
         Long userImageId = 1L;
         UserImage existingUserImage = new UserImage();
         existingUserImage.setId(userImageId);
-        byte[] originalImageBytes = "original image".getBytes();
-        existingUserImage.setProfileImage(originalImageBytes);
+        existingUserImage.setProfileImage("original image".getBytes());
 
         byte[] defaultProfileImageBytes = userImageService.getDefaultProfileImageBytes();
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
-        when(userImageRepository.save(any(UserImage.class))).thenReturn(existingUserImage);
 
         userImageService.deleteProfileImageAndUploadDefault(userImageId);
+
         assertArrayEquals(defaultProfileImageBytes, existingUserImage.getProfileImage());
+        verify(userImageRepository, times(1)).save(existingUserImage);
     }
 
-
     @Test
-    void deleteProfileImageAndUploadDefault_ThrowsUserImageProfileNotFound(){
+    void deleteProfileImageAndUploadDefault_ThrowsUserImageProfileNotFound() {
         Long userImageId = 1L;
         UserImage existingUserImage = new UserImage();
-        byte[] originalImageBytes = userImageService.getDefaultProfileImageBytes();
+        byte[] defaultImage = userImageService.getDefaultProfileImageBytes();
         existingUserImage.setId(userImageId);
-        existingUserImage.setProfileImage(originalImageBytes);
+        existingUserImage.setProfileImage(defaultImage);
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
 
-        assertThrows(UserImageProfileNotFound.class, () ->{
-            userImageService.deleteProfileImageAndUploadDefault(userImageId);
-        });
-
+        assertThrows(UserImageProfileNotFound.class, () -> userImageService.deleteProfileImageAndUploadDefault(userImageId));
     }
 
     @Test
-    void getProfileByUserId_Successful() {
+    void getProfileByUserId_Success() {
         Long userId = 1L;
         UserImage userImage = new UserImage();
-        byte[] existByte = "ExampleBytes".getBytes();
-        userImage.setProfileImage(existByte);
+        byte[] imageBytes = "ExampleBytes".getBytes();
+        userImage.setProfileImage(imageBytes);
         userImage.setId(userId);
 
         when(userImageRepository.findById(userId)).thenReturn(Optional.of(userImage));
 
         byte[] result = userImageService.getProfileByUserId(userId);
 
-        assertEquals(existByte, result);
+        assertArrayEquals(imageBytes, result);
     }
 
     @Test
-    void getProfileByUserId_ThrowsResponseStatusException(){
+    void getProfileByUserId_ThrowsResponseStatusException() {
         Long userId = 1L;
-        UserImage userImage = new UserImage();
 
         when(userImageRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> {
-           userImageService.getProfileByUserId(userId);
-        });
+        assertThrows(ResponseStatusException.class, () -> userImageService.getProfileByUserId(userId));
     }
 
+    @Test
+    void getProfileByUserId_ThrowsUsernameNotFoundException() {
+        Long userId = 1L;
+
+        when(userImageRepository.findById(userId)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(ResponseStatusException.class, () -> userImageService.getProfileByUserId(userId));
+
+        assertTrue(exception.getMessage().contains("Пользователь не найден"));
+    }
+
+    @Test
+    void changeProfileImage_NullMultipartFile_ThrowsException() {
+        Long userImageId = 1L;
+        UserImage existingUserImage = new UserImage();
+        existingUserImage.setId(userImageId);
+
+        ImageUploadDto imageUploadDto = new ImageUploadDto();
+        imageUploadDto.setId(userImageId);
+        imageUploadDto.setImage(null);
+
+        when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
+
+        assertThrows(NullPointerException.class, () -> userImageService.changeProfileImage(imageUploadDto));
+    }
 }

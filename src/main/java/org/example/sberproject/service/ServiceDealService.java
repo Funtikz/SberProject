@@ -36,7 +36,7 @@ public class ServiceDealService {
 
     }
 
-    public Page<NotAuthServiceDealResponseDto> getServicesByCategory(List<Category> category, Pageable pageable) {
+    public Page<NotAuthServiceDealResponseDto> searchServicesByCategory(List<Category> category, Pageable pageable) {
         return serviceRepository.findByCategoryServiceIn(category, pageable).map(this::toNotAuthDto);
     }
 
@@ -45,6 +45,12 @@ public class ServiceDealService {
         String login = authentication.getName();
         User currentUser = userService.findByPhoneNumber(login);
         return serviceRepository.findByApplicant(currentUser, pageable)
+                .map(this::toNotAuthDto);
+    }
+
+
+    public Page<NotAuthServiceDealResponseDto> searchServicesByKeyword(Pageable pageable, String message){
+        return serviceRepository.findByDescriptionServiceContainingIgnoreCase(message, pageable)
                 .map(this::toNotAuthDto);
     }
 

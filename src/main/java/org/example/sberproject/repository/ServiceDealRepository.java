@@ -15,4 +15,5 @@ public interface ServiceDealRepository extends JpaRepository<ServiceDeal, Long> 
     Page<ServiceDeal> findByCategoryService(Category category, Pageable pageable);
     Page<ServiceDeal> findByApplicant(User applicant, Pageable pageable);
     Page<ServiceDeal> findByCategoryServiceIn(List<Category> categories, Pageable pageable);
+    Page<ServiceDeal> findByDescriptionServiceContainingIgnoreCase(String message, Pageable pageable);
 }

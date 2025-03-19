@@ -7,6 +7,7 @@ import org.example.sberproject.entity.FavoriteServiceDeal;
 import org.example.sberproject.entity.ServiceDeal;
 import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.FavoriteException;
+import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.FavoriteServiceDealRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -55,7 +56,7 @@ public class FavoriteServiceDealService {
         }
         else {
             log.error("Данной услуги нет в избранном");
-            throw  new IllegalArgumentException();
+            throw new ServiceNotFoundException();
         }
     }
 

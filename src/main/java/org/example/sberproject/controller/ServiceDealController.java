@@ -32,8 +32,15 @@ public class ServiceDealController {
     @GetMapping("/category")
     public ResponseEntity<Page<NotAuthServiceDealResponseDto>> getServicesByCategories(
             @RequestParam List<Category> categories, Pageable pageable) {
-        Page<NotAuthServiceDealResponseDto> services = service.getServicesByCategory(categories, pageable);
+        Page<NotAuthServiceDealResponseDto> services = service.searchServicesByCategory(categories, pageable);
         return ResponseEntity.ok(services);
+    }
+
+    @GetMapping("/services/search")
+    public ResponseEntity<Page<NotAuthServiceDealResponseDto>> searchServices(@RequestParam String keyword,
+                                                                              Pageable pageable){
+        Page<NotAuthServiceDealResponseDto> servicesBySearch = service.searchServicesByKeyword(pageable, keyword);
+        return ResponseEntity.ok(servicesBySearch);
     }
 
     @GetMapping("my-services")

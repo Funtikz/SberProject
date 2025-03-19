@@ -2,7 +2,6 @@ package org.example.sberproject.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.sberproject.dto.user.ImageUploadDto;
-import org.example.sberproject.entity.UserImage;
 import org.example.sberproject.service.UserImageService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,9 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("api/images")
@@ -25,10 +21,10 @@ public class UserImageController {
 
     @PutMapping("/update")
     public ResponseEntity<String> updateImage(@RequestParam("userId") Long userId,
-                                              @RequestParam("images")MultipartFile image){
+                                              @RequestParam("images")MultipartFile images){
         ImageUploadDto imageUpdateDto = new ImageUploadDto();
         imageUpdateDto.setId(userId);
-        imageUpdateDto.setImage(image);
+        imageUpdateDto.setImage(images);
         imageService.changeProfileImage(imageUpdateDto);
         return ResponseEntity.ok("Картинка успешна обновлена!");
     }
