@@ -1,4 +1,4 @@
-package org.example.sberproject.service;
+package org.example.sberproject.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.Data;
@@ -10,6 +10,7 @@ import org.example.sberproject.exceptions.FileIsEmpty;
 import org.example.sberproject.exceptions.UserImageProfileNotFound;
 import org.example.sberproject.exceptions.UsernameNotFoundException;
 import org.example.sberproject.repository.UserImageRepository;
+import org.example.sberproject.service.api.UserImageService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,9 +26,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class UserImageService {
+public class UserImageServiceImpl implements UserImageService {
     private final UserImageRepository repo;
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     @Transactional
     public void changeProfileImage(ImageUploadDto imageUploadDto){

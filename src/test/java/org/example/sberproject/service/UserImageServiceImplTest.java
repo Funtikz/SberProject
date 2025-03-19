@@ -5,6 +5,7 @@ import org.example.sberproject.entity.UserImage;
 import org.example.sberproject.exceptions.FileIsEmpty;
 import org.example.sberproject.exceptions.UserImageProfileNotFound;
 import org.example.sberproject.repository.UserImageRepository;
+import org.example.sberproject.service.impl.UserImageServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -23,10 +24,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-class UserImageServiceTest {
+class UserImageServiceImplTest {
 
     @Autowired
-    UserImageService userImageService;
+    UserImageServiceImpl userImageServiceImpl;
 
     @MockitoBean
     UserImageRepository userImageRepository;
@@ -44,7 +45,7 @@ class UserImageServiceTest {
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(expected));
 
-        UserImage actual = userImageService.findUserImageById(userImageId);
+        UserImage actual = userImageServiceImpl.findUserImageById(userImageId);
 
         assertEquals(expected, actual);
     }
@@ -55,7 +56,7 @@ class UserImageServiceTest {
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> userImageService.findUserImageById(userImageId));
+        assertThrows(ResponseStatusException.class, () -> userImageServiceImpl.findUserImageById(userImageId));
     }
 
     @Test
@@ -77,7 +78,7 @@ class UserImageServiceTest {
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
         when(userImageRepository.save(any(UserImage.class))).thenReturn(existingUserImage);
 
-        userImageService.changeProfileImage(imageUploadDto);
+        userImageServiceImpl.changeProfileImage(imageUploadDto);
 
         assertArrayEquals(contentBytes, existingUserImage.getProfileImage());
     }
@@ -98,7 +99,7 @@ class UserImageServiceTest {
         imageUploadDto.setId(userImageId);
         imageUploadDto.setImage(mockMultipartFile);
 
-        assertThrows(FileIsEmpty.class, () -> userImageService.changeProfileImage(imageUploadDto));
+        assertThrows(FileIsEmpty.class, () -> userImageServiceImpl.changeProfileImage(imageUploadDto));
     }
 
     @Test
@@ -118,7 +119,7 @@ class UserImageServiceTest {
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
 
-        assertThrows(RuntimeException.class, () -> userImageService.changeProfileImage(imageUploadDto));
+        assertThrows(RuntimeException.class, () -> userImageServiceImpl.changeProfileImage(imageUploadDto));
     }
 
     @Test
@@ -128,11 +129,11 @@ class UserImageServiceTest {
         existingUserImage.setId(userImageId);
         existingUserImage.setProfileImage("original image".getBytes());
 
-        byte[] defaultProfileImageBytes = userImageService.getDefaultProfileImageBytes();
+        byte[] defaultProfileImageBytes = userImageServiceImpl.getDefaultProfileImageBytes();
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
 
-        userImageService.deleteProfileImageAndUploadDefault(userImageId);
+        userImageServiceImpl.deleteProfileImageAndUploadDefault(userImageId);
 
         assertArrayEquals(defaultProfileImageBytes, existingUserImage.getProfileImage());
         verify(userImageRepository, times(1)).save(existingUserImage);
@@ -142,13 +143,13 @@ class UserImageServiceTest {
     void deleteProfileImageAndUploadDefault_ThrowsUserImageProfileNotFound() {
         Long userImageId = 1L;
         UserImage existingUserImage = new UserImage();
-        byte[] defaultImage = userImageService.getDefaultProfileImageBytes();
+        byte[] defaultImage = userImageServiceImpl.getDefaultProfileImageBytes();
         existingUserImage.setId(userImageId);
         existingUserImage.setProfileImage(defaultImage);
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
 
-        assertThrows(UserImageProfileNotFound.class, () -> userImageService.deleteProfileImageAndUploadDefault(userImageId));
+        assertThrows(UserImageProfileNotFound.class, () -> userImageServiceImpl.deleteProfileImageAndUploadDefault(userImageId));
     }
 
     @Test
@@ -161,7 +162,7 @@ class UserImageServiceTest {
 
         when(userImageRepository.findById(userId)).thenReturn(Optional.of(userImage));
 
-        byte[] result = userImageService.getProfileByUserId(userId);
+        byte[] result = userImageServiceImpl.getProfileByUserId(userId);
 
         assertArrayEquals(imageBytes, result);
     }
@@ -172,7 +173,7 @@ class UserImageServiceTest {
 
         when(userImageRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> userImageService.getProfileByUserId(userId));
+        assertThrows(ResponseStatusException.class, () -> userImageServiceImpl.getProfileByUserId(userId));
     }
 
     @Test
@@ -181,7 +182,7 @@ class UserImageServiceTest {
 
         when(userImageRepository.findById(userId)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(ResponseStatusException.class, () -> userImageService.getProfileByUserId(userId));
+        Exception exception = assertThrows(ResponseStatusException.class, () -> userImageServiceImpl.getProfileByUserId(userId));
 
         assertTrue(exception.getMessage().contains("Пользователь не найден"));
     }
@@ -198,6 +199,6 @@ class UserImageServiceTest {
 
         when(userImageRepository.findById(userImageId)).thenReturn(Optional.of(existingUserImage));
 
-        assertThrows(NullPointerException.class, () -> userImageService.changeProfileImage(imageUploadDto));
+        assertThrows(NullPointerException.class, () -> userImageServiceImpl.changeProfileImage(imageUploadDto));
     }
 }

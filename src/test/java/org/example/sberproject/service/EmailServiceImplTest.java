@@ -4,6 +4,7 @@ import org.example.sberproject.entity.Category;
 import org.example.sberproject.entity.ServiceDeal;
 import org.example.sberproject.entity.User;
 import org.example.sberproject.entity.UserRating;
+import org.example.sberproject.service.impl.EmailServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,13 +17,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
-class EmailServiceTest {
+class EmailServiceImplTest {
 
     @Mock
     private JavaMailSender emailSender;
 
     @InjectMocks
-    private EmailService emailService;
+    private EmailServiceImpl emailServiceImpl;
 
     private User user;
     private UserRating userRating;
@@ -55,7 +56,7 @@ class EmailServiceTest {
 
     @Test
     void testSendEmailNotificationValid() {
-        emailService.sendEmailNotification(user.getEmail(), userRating, serviceDeal, offeredServiceDeal, user.getFirstName(), user.getLastName());
+        emailServiceImpl.sendEmailNotification(user.getEmail(), userRating, serviceDeal, offeredServiceDeal, user.getFirstName(), user.getLastName());
         verify(emailSender, times(1)).send(Mockito.any(SimpleMailMessage.class));
     }
 
@@ -63,20 +64,20 @@ class EmailServiceTest {
     void testSendEmailNotificationEmptyEmail() {
         String invalidEmail = "";
 
-        emailService.sendEmailNotification(invalidEmail, userRating, serviceDeal, offeredServiceDeal, user.getFirstName(), user.getLastName());
+        emailServiceImpl.sendEmailNotification(invalidEmail, userRating, serviceDeal, offeredServiceDeal, user.getFirstName(), user.getLastName());
 
         verify(emailSender, times(0)).send(Mockito.any(SimpleMailMessage.class));
     }
 
     @Test
     void testSendOfferRejectedNotification() {
-        emailService.sendOfferRejectedNotification(user, serviceDeal, offeredServiceDeal);
+        emailServiceImpl.sendOfferRejectedNotification(user, serviceDeal, offeredServiceDeal);
         verify(emailSender, times(1)).send(Mockito.any(SimpleMailMessage.class));
     }
 
     @Test
     void testExchangeContactData() {
-        emailService.exchangeContactData(user, user, serviceDeal, offeredServiceDeal);
+        emailServiceImpl.exchangeContactData(user, user, serviceDeal, offeredServiceDeal);
         verify(emailSender, times(2)).send(Mockito.any(SimpleMailMessage.class));
     }
 }

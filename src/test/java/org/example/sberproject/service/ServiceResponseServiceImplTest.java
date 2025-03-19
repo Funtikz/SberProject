@@ -4,6 +4,10 @@ import org.example.sberproject.dto.service.ServiceResponseDto;
 import org.example.sberproject.entity.*;
 import org.example.sberproject.exceptions.ResponseException;
 import org.example.sberproject.repository.ServiceResponseRepository;
+import org.example.sberproject.service.impl.EmailServiceImpl;
+import org.example.sberproject.service.impl.ServiceDealServiceImpl;
+import org.example.sberproject.service.impl.ServiceResponseServiceImpl;
+import org.example.sberproject.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,22 +26,22 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ServiceResponseServiceTest {
+class ServiceResponseServiceImplTest {
 
     @Mock
     private ServiceResponseRepository repository;
 
     @Mock
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Mock
-    private ServiceDealService dealService;
+    private ServiceDealServiceImpl dealService;
 
     @Mock
-    private EmailService emailService;
+    private EmailServiceImpl emailServiceImpl;
 
     @InjectMocks
-    private ServiceResponseService serviceResponseService;
+    private ServiceResponseServiceImpl serviceResponseServiceImpl;
 
     private User consumer;
     private User producer;
@@ -84,7 +88,7 @@ class ServiceResponseServiceTest {
     void updateResponseStatus_Success() {
         when(repository.findById(1L)).thenReturn(Optional.of(serviceResponse));
 
-        serviceResponseService.updateResponseStatus(1L, ResponseStatus.ACCEPTED);
+        serviceResponseServiceImpl.updateResponseStatus(1L, ResponseStatus.ACCEPTED);
 
         assertEquals(ResponseStatus.ACCEPTED, serviceResponse.getResponseStatus());
         verify(repository, times(1)).save(serviceResponse);
@@ -96,7 +100,7 @@ class ServiceResponseServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(serviceResponse));
 
         ResponseException exception = assertThrows(ResponseException.class, () ->
-                serviceResponseService.updateResponseStatus(1L, ResponseStatus.REJECTED));
+                serviceResponseServiceImpl.updateResponseStatus(1L, ResponseStatus.REJECTED));
 
         assertEquals("Этот отклик уже обработан!", exception.getMessage());
     }
@@ -105,10 +109,10 @@ class ServiceResponseServiceTest {
     void getAllMyResponse_Success() {
         mockAuthentication("+79112223344");
 
-        when(userService.findByPhoneNumber("+79112223344")).thenReturn(consumer);
+        when(userServiceImpl.findByPhoneNumber("+79112223344")).thenReturn(consumer);
         when(repository.findAllByUser(consumer)).thenReturn(List.of(serviceResponse));
 
-        List<ServiceResponseDto> responses = serviceResponseService.getAllMyResponse();
+        List<ServiceResponseDto> responses = serviceResponseServiceImpl.getAllMyResponse();
 
         assertEquals(1, responses.size());
     }
@@ -117,11 +121,11 @@ class ServiceResponseServiceTest {
     void getResponsesForMyService_Success() {
         mockAuthentication("+79223334455");
 
-        when(userService.findByPhoneNumber("+79223334455")).thenReturn(producer);
+        when(userServiceImpl.findByPhoneNumber("+79223334455")).thenReturn(producer);
         when(dealService.findById(100L)).thenReturn(serviceDeal);
         when(repository.findAllByServiceDeal(serviceDeal)).thenReturn(List.of(serviceResponse));
 
-        List<ServiceResponseDto> responses = serviceResponseService.getResponsesForMyService(100L);
+        List<ServiceResponseDto> responses = serviceResponseServiceImpl.getResponsesForMyService(100L);
 
         assertEquals(1, responses.size());
     }
@@ -130,15 +134,15 @@ class ServiceResponseServiceTest {
     void responseToService_Success() {
         mockAuthentication("+79112223344");
 
-        when(userService.findByPhoneNumber("+79112223344")).thenReturn(consumer);
+        when(userServiceImpl.findByPhoneNumber("+79112223344")).thenReturn(consumer);
         when(dealService.findById(100L)).thenReturn(serviceDeal);
         when(dealService.findById(200L)).thenReturn(offeredServiceDeal);
         when(repository.findByServiceDealAndUser(serviceDeal, consumer)).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> serviceResponseService.responseToService(100L, 200L));
+        assertDoesNotThrow(() -> serviceResponseServiceImpl.responseToService(100L, 200L));
 
         verify(repository, times(1)).save(any(ServiceResponse.class));
-        verify(emailService, times(1)).sendEmailNotification(
+        verify(emailServiceImpl, times(1)).sendEmailNotification(
                 eq(producer.getEmail()), any(), eq(serviceDeal), eq(offeredServiceDeal),
                 eq(consumer.getFirstName()), eq(consumer.getLastName())
         );
@@ -150,11 +154,11 @@ class ServiceResponseServiceTest {
 
         serviceDeal.setApplicant(consumer);
 
-        when(userService.findByPhoneNumber("+79112223344")).thenReturn(consumer);
+        when(userServiceImpl.findByPhoneNumber("+79112223344")).thenReturn(consumer);
         when(dealService.findById(100L)).thenReturn(serviceDeal);
 
         ResponseException exception = assertThrows(ResponseException.class,
-                () -> serviceResponseService.responseToService(100L, 200L));
+                () -> serviceResponseServiceImpl.responseToService(100L, 200L));
 
         assertEquals("Нельзя откликнуться на свою же заявку", exception.getMessage());
 
@@ -165,12 +169,12 @@ class ServiceResponseServiceTest {
     void responseToService_Fail_AlreadyResponded() {
         mockAuthentication("+79112223344");
 
-        when(userService.findByPhoneNumber("+79112223344")).thenReturn(consumer);
+        when(userServiceImpl.findByPhoneNumber("+79112223344")).thenReturn(consumer);
         when(dealService.findById(100L)).thenReturn(serviceDeal);
         when(repository.findByServiceDealAndUser(serviceDeal, consumer)).thenReturn(Optional.of(serviceResponse));
 
         ResponseException exception = assertThrows(ResponseException.class,
-                () -> serviceResponseService.responseToService(100L, 200L));
+                () -> serviceResponseServiceImpl.responseToService(100L, 200L));
 
         assertEquals("Вы уже откликались на данную заявку!", exception.getMessage());
 

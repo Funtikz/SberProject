@@ -7,7 +7,7 @@ import org.example.sberproject.dto.service.NotAuthServiceDealResponseDto;
 import org.example.sberproject.dto.service.ServiceDealRequestDto;
 import org.example.sberproject.dto.service.AuthServiceDealResponseDto;
 import org.example.sberproject.entity.Category;
-import org.example.sberproject.service.ServiceDealService;
+import org.example.sberproject.service.impl.ServiceDealServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ServiceDealController {
-    private final ServiceDealService service;
+    private final ServiceDealServiceImpl service;
 
     @GetMapping("/get-all")
     public ResponseEntity<Page<NotAuthServiceDealResponseDto>> getAllServices(Pageable pageable) {

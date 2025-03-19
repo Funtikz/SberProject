@@ -1,4 +1,4 @@
-package org.example.sberproject.service;
+package org.example.sberproject.service.impl;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +16,7 @@ import org.example.sberproject.exceptions.*;
 import org.example.sberproject.repository.UserImageRepository;
 import org.example.sberproject.repository.UserRepository;
 import org.example.sberproject.security.jwt.JwtService;
+import org.example.sberproject.service.api.UserService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,7 +33,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserService {
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;

@@ -1,4 +1,4 @@
-package org.example.sberproject.service;
+package org.example.sberproject.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.Data;
@@ -12,6 +12,7 @@ import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.ResponseException;
 import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.ServiceResponseRepository;
+import org.example.sberproject.service.api.ServiceResponseService;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,20 +27,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Data
 @Slf4j
-public class ServiceResponseService {
+public class ServiceResponseServiceImpl implements ServiceResponseService {
     private final ServiceResponseRepository repository;
-    private final UserService userService;
-    private final ServiceDealService dealService;
+    private final UserServiceImpl userServiceImpl;
+    private final ServiceDealServiceImpl dealService;
     private final JavaMailSender emailSender;
-    private final ServiceDealService serviceDealService;
-    private final EmailService emailService;
+    private final ServiceDealServiceImpl serviceDealServiceImpl;
+    private final EmailServiceImpl emailServiceImpl;
 
 
     @Transactional
     public void updateResponseStatus(Long serviceResponseId, ResponseStatus newStatus){
         ServiceResponse service = repository.findById(serviceResponseId).orElseThrow(() -> {
             log.error("Услуги с " + serviceResponseId + "не существует");
-            throw new ServiceNotFoundException("Услуги с " + serviceResponseId + "не существует");
+            return new ServiceNotFoundException("Услуги с " + serviceResponseId + "не существует");
         });
 
         if (service.getResponseStatus() != ResponseStatus.PENDING) {
@@ -51,11 +52,11 @@ public class ServiceResponseService {
         User consumer = service.getUser();
         User producer = service.getServiceDeal().getApplicant();
         if (newStatus.equals(ResponseStatus.ACCEPTED)){
-            emailService.exchangeContactData(producer, consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
+            emailServiceImpl.exchangeContactData(producer, consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
             // TODO Добавить изменение категории услуги, чтобы она не показывалась в новом поиске
         }
         else {
-            emailService.sendOfferRejectedNotification(consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
+            emailServiceImpl.sendOfferRejectedNotification(consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
         }
     }
 
@@ -65,14 +66,14 @@ public class ServiceResponseService {
     public List<ServiceResponseDto> getAllMyResponse(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String login = authentication.getName();
-        User consumer = userService.findByPhoneNumber(login);
+        User consumer = userServiceImpl.findByPhoneNumber(login);
         return repository.findAllByUser(consumer).stream().map(this::mapToDto).toList();
     }
 
     public List<ServiceResponseDto> getResponsesForMyService(Long serviceDealId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String login = authentication.getName();
-        User producer = userService.findByPhoneNumber(login);
+        User producer = userServiceImpl.findByPhoneNumber(login);
         ServiceDeal serviceDeal = dealService.findById(serviceDealId);
         if (!serviceDeal.getApplicant().equals(producer)) {
             throw new ResponseException("Вы не являетесь владельцем этой услуги!");
@@ -85,7 +86,7 @@ public class ServiceResponseService {
     public void responseToService(Long serviceId, Long offeredServiceId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String login = authentication.getName();
-        User consumer = userService.findByPhoneNumber(login);
+        User consumer = userServiceImpl.findByPhoneNumber(login);
         ServiceDeal serviceDeal = dealService.findById(serviceId);
         ServiceDeal offeredServiceDeal = dealService.findById(offeredServiceId);
         User producer = serviceDeal.getApplicant();
@@ -106,7 +107,7 @@ public class ServiceResponseService {
         serviceResponse.setOfferedServiceDeal(offeredServiceDeal);
         serviceResponse.setUser(consumer);
         repository.save(serviceResponse);
-        emailService.sendEmailNotification(producer.getEmail(), consumer.getRating(),
+        emailServiceImpl.sendEmailNotification(producer.getEmail(), consumer.getRating(),
                 serviceDeal, offeredServiceDeal, consumer.getFirstName(), consumer.getLastName());
         log.info("Вы откликнулись на услугу с ID: " + serviceId);
 
@@ -115,7 +116,7 @@ public class ServiceResponseService {
     private ServiceResponseDto mapToDto(ServiceResponse serviceResponse) {
         ServiceResponseDto dto = new ServiceResponseDto();
         dto.setId(serviceResponse.getId());
-        dto.setRating(userService.toDto(serviceResponse.getUser().getRating()));
+        dto.setRating(userServiceImpl.toDto(serviceResponse.getUser().getRating()));
         dto.setServiceDeal(dealService.toNotAuthDto(serviceResponse.getServiceDeal()));
         dto.setDateOfResponse(serviceResponse.getDateOfResponse());
         dto.setResponseStatus(serviceResponse.getResponseStatus());

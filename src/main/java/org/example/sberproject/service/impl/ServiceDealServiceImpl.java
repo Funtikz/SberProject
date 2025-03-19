@@ -1,4 +1,4 @@
-package org.example.sberproject.service;
+package org.example.sberproject.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.Data;
@@ -12,6 +12,7 @@ import org.example.sberproject.entity.ServiceDeal;
 import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.ServiceDealRepository;
+import org.example.sberproject.service.api.ServiceDealService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -26,10 +27,10 @@ import java.util.List;
 @Data
 @RequiredArgsConstructor
 @Slf4j
-public class ServiceDealService {
+public class ServiceDealServiceImpl implements ServiceDealService {
 
     private final ServiceDealRepository serviceRepository;
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     public Page<NotAuthServiceDealResponseDto> getAllServices(Pageable pageable){
         return serviceRepository.findAll(pageable).map(this::toNotAuthDto);
@@ -43,7 +44,7 @@ public class ServiceDealService {
     public Page<NotAuthServiceDealResponseDto> getMyServices(Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String login = authentication.getName();
-        User currentUser = userService.findByPhoneNumber(login);
+        User currentUser = userServiceImpl.findByPhoneNumber(login);
         return serviceRepository.findByApplicant(currentUser, pageable)
                 .map(this::toNotAuthDto);
     }
@@ -58,7 +59,7 @@ public class ServiceDealService {
     public AuthServiceDealResponseDto createService(ServiceDealRequestDto requestDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String login = authentication.getName();
-        User user = userService.findByPhoneNumber(login);
+        User user = userServiceImpl.findByPhoneNumber(login);
         ServiceDeal service = new ServiceDeal();
         service.setApplicant(user);
         service.setCategoryService(requestDto.getCategoryService());
@@ -76,7 +77,7 @@ public class ServiceDealService {
         ServiceDeal service = findById(serviceId);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String login = authentication.getName();
-        User user = userService.findByPhoneNumber(login);
+        User user = userServiceImpl.findByPhoneNumber(login);
         service.setApplicant(user);
         service.setCategoryService(requestDto.getCategoryService());
         service.setDescriptionService(requestDto.getDescriptionService());

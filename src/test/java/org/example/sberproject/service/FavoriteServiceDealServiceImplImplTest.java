@@ -6,6 +6,9 @@ import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.FavoriteException;
 import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.FavoriteServiceDealRepository;
+import org.example.sberproject.service.impl.FavoriteServiceDealServiceImpl;
+import org.example.sberproject.service.impl.ServiceDealServiceImpl;
+import org.example.sberproject.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,19 +27,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-class FavoriteServiceDealServiceTest {
+class FavoriteServiceDealServiceImplImplTest {
 
     @Autowired
-    FavoriteServiceDealService favoriteService;
+    FavoriteServiceDealServiceImpl favoriteService;
 
     @MockitoBean
     FavoriteServiceDealRepository repository;
 
     @MockitoBean
-    UserService userService;
+    UserServiceImpl userServiceImpl;
 
     @MockitoBean
-    ServiceDealService dealService;
+    ServiceDealServiceImpl dealService;
 
     @MockitoBean
     SecurityContext securityContext;
@@ -47,7 +50,7 @@ class FavoriteServiceDealServiceTest {
     @AfterEach
     public void afterEach(){
         Mockito.reset(repository);
-        Mockito.reset(userService);
+        Mockito.reset(userServiceImpl);
         Mockito.reset(dealService);
         Mockito.reset(securityContext);
         Mockito.reset(authentication);
@@ -76,7 +79,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(dealService.findById(serviceId)).thenReturn(serviceDeal);
 
         FavoriteServiceDeal favoriteServiceDealMock = new FavoriteServiceDeal();
@@ -117,7 +120,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(dealService.findById(serviceId)).thenReturn(serviceDeal);
 
         FavoriteServiceDeal favoriteServiceDealMock = new FavoriteServiceDeal();
@@ -157,7 +160,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(dealService.findById(serviceId)).thenReturn(serviceDeal);
 
         when(repository.findFavoriteServiceDealByUserAndServiceDeal(user, serviceDeal))
@@ -187,7 +190,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(dealService.findById(serviceId)).thenReturn(serviceDeal);
 
         when(repository.findFavoriteServiceDealByUserAndServiceDeal(user, serviceDeal)).thenReturn(Optional.empty());
@@ -228,7 +231,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
 
         when(repository.findFavoriteServiceDealByUser(user))
                 .thenReturn(Arrays.asList(favoriteServiceDeal1, favoriteServiceDeal2));
@@ -255,7 +258,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
 
         when(repository.findFavoriteServiceDealByUser(user)).thenReturn(Arrays.asList());
 
@@ -280,7 +283,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(dealService.findById(serviceId)).thenThrow(ServiceNotFoundException.class);
 
         assertThrows(ServiceNotFoundException.class, () -> favoriteService.addToFavorite(serviceId));
@@ -305,7 +308,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(dealService.findById(serviceId)).thenReturn(serviceDeal);
 
         // Мокаем ситуацию, когда сервис не найден в избранных
@@ -323,13 +326,13 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(null);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(null);
 
         List<ServiceDeal> favoriteServices = favoriteService.findFavoriteServices();
         assertNotNull(favoriteServices);
         assertTrue(favoriteServices.isEmpty());
 
-        verify(userService, times(1)).findByPhoneNumber(phoneNumber);
+        verify(userServiceImpl, times(1)).findByPhoneNumber(phoneNumber);
     }
 
     @Test
@@ -346,7 +349,7 @@ class FavoriteServiceDealServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userService.findByPhoneNumber(phoneNumber)).thenReturn(user);
+        when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(repository.findFavoriteServiceDealByUser(user)).thenThrow(new RuntimeException("Database error"));
 
         assertThrows(RuntimeException.class, () -> favoriteService.findFavoriteServices());

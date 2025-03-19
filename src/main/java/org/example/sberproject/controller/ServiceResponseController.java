@@ -3,7 +3,7 @@ package org.example.sberproject.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.sberproject.dto.service.ServiceResponseDto;
 import org.example.sberproject.entity.ResponseStatus;
-import org.example.sberproject.service.ServiceResponseService;
+import org.example.sberproject.service.impl.ServiceResponseServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/api/service")
 @RequiredArgsConstructor
 public class ServiceResponseController {
-    private final ServiceResponseService service;
+    private final ServiceResponseServiceImpl service;
 
     //Просмотр всех кто откликнулся на нашу услугу по id
     @GetMapping("/responses/{serviceDealId}")

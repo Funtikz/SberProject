@@ -2,7 +2,7 @@ package org.example.sberproject.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.sberproject.dto.user.ImageUploadDto;
-import org.example.sberproject.service.UserImageService;
+import org.example.sberproject.service.impl.UserImageServiceImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class UserImageController {
 
-    private final UserImageService imageService;
+    private final UserImageServiceImpl imageService;
 
     @PutMapping("/update")
     public ResponseEntity<String> updateImage(@RequestParam("userId") Long userId,

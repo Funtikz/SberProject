@@ -8,6 +8,8 @@ import org.example.sberproject.entity.ServiceDeal;
 import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.ServiceDealRepository;
+import org.example.sberproject.service.impl.ServiceDealServiceImpl;
+import org.example.sberproject.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +31,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-class ServiceDealServiceTest {
+class ServiceDealServiceImplTest {
 
     @Autowired
-    private ServiceDealService service;
+    private ServiceDealServiceImpl service;
 
     @MockitoBean
     private ServiceDealRepository repository;
 
     @MockitoBean
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @MockitoBean
     private SecurityContext securityContext;
@@ -57,7 +59,7 @@ class ServiceDealServiceTest {
         SecurityContextHolder.setContext(securityContext);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         when(authentication.getName()).thenReturn(testUser.getPhoneNumber());
-        when(userService.findByPhoneNumber(testUser.getPhoneNumber())).thenReturn(testUser);
+        when(userServiceImpl.findByPhoneNumber(testUser.getPhoneNumber())).thenReturn(testUser);
     }
 
     @Test
