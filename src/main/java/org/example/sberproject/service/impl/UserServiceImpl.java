@@ -42,7 +42,6 @@ public class UserServiceImpl implements UserService {
 
     //Вход для User и установка в куки
     public UserResponseDto login(UserAuthDto userCredentialDto, HttpServletResponse response){
-        // 1. Ищем пользователя по номеру телефона
         log.info("Поиск пользователя по номеру телефона");
         String number = userCredentialDto.getPhoneNumber();
         String password = userCredentialDto.getPassword();
@@ -51,17 +50,14 @@ public class UserServiceImpl implements UserService {
             User user = userOpt.get();
             log.debug("Пользователь с телефоном" + user.getPhoneNumber() + "найден");
             if (passwordEncoder.matches(password, user.getPassword())) {
-                // 3. Генерируем JWT с ролями
                 log.info("Пароли совпадают: генерируем JWT");
                 String jwtToken = jwtService.generateJwtToken(user.getPhoneNumber(), user.getRoles());
 
-                // 4. Создаем httpOnly cookie
                 Cookie jwtCookie = new Cookie("jwt-auth-token", jwtToken);
                 jwtCookie.setHttpOnly(true);
                 jwtCookie.setPath("/");
-                jwtCookie.setMaxAge(180 * 24 * 60 * 60); // Время жизни куки - 180 дней
+                jwtCookie.setMaxAge(180 * 24 * 60 * 60);
 
-                // 5. Добавляем куки в response
                 response.addCookie(jwtCookie);
                 UserResponseDto dto = toDto(user);
                 log.info("JWT добавлена в куки");
@@ -71,7 +67,6 @@ public class UserServiceImpl implements UserService {
                 throw new DifferentPassword();
             }
         }
-        // 6. Если аутентификация неуспешна, возвращаем ошибку
         log.error("Пользователь с номером телефона: {} не найден", number);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден");
     }
@@ -127,14 +122,13 @@ public class UserServiceImpl implements UserService {
     }
 
     public User findByPhoneNumber(String number){
-        User user = userRepository.findByPhoneNumber(number).orElseThrow(
+        return userRepository.findByPhoneNumber(number).orElseThrow(
                 () ->{
                     String errorMessage = "Пользователь с номером телефона:  " + number + "не найден";
                     log.error(errorMessage, new UsernameNotFoundException(errorMessage));
                     return new UsernameNotFoundException("Пользователь не найден");
                 }
         );
-        return user;
     }
 
     public User getCurrentUser(Object principal) {
