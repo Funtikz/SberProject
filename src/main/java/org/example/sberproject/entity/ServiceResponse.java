@@ -27,7 +27,7 @@ public class ServiceResponse {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "offered_service_deal_id")
-    private ServiceDeal offeredServiceDeal; // Услуга, которую предлагает пользователь в ответ
+    private ServiceDeal offeredServiceDeal;
 
     @Enumerated
     private ResponseStatus responseStatus = ResponseStatus.PENDING;

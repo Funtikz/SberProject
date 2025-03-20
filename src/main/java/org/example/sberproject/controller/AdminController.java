@@ -17,7 +17,6 @@ import java.util.List;
 public class AdminController {
     private final UserServiceImpl userServiceImpl;
 
-    //Список всех пользователей
     @GetMapping("get-all")
     public ResponseEntity<List<User>> getAll(){
         return  new ResponseEntity<>(userServiceImpl.getAll(), HttpStatus.OK);

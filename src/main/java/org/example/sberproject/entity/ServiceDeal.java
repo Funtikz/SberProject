@@ -37,7 +37,6 @@ public class ServiceDeal {
             joinColumns = @JoinColumn(name = "service_deal_id"))
     private List<Category> awaitingCategoryService;
 
-    // TODO Добавить поле которое будет обозначать находиться во всех запросах или нет
 
     private String awaitDescriptionService;
 

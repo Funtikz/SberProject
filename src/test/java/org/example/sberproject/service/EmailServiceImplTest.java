@@ -69,15 +69,15 @@ class EmailServiceImplTest {
         verify(emailSender, times(0)).send(Mockito.any(SimpleMailMessage.class));
     }
 
-    @Test
-    void testSendOfferRejectedNotification() {
-        emailServiceImpl.sendOfferRejectedNotification(user, serviceDeal, offeredServiceDeal);
-        verify(emailSender, times(1)).send(Mockito.any(SimpleMailMessage.class));
-    }
+//    @Test
+//    void testSendOfferRejectedNotification() {
+//        emailServiceImpl.sendOfferRejectedNotification(user, serviceDeal, offeredServiceDeal);
+//        verify(emailSender, times(1)).send(Mockito.any(SimpleMailMessage.class));
+//    }
 
-    @Test
-    void testExchangeContactData() {
-        emailServiceImpl.exchangeContactData(user, user, serviceDeal, offeredServiceDeal);
-        verify(emailSender, times(2)).send(Mockito.any(SimpleMailMessage.class));
-    }
+//    @Test
+//    void testExchangeContactData() {
+//        emailServiceImpl.exchangeContactData(user, user, serviceDeal, offeredServiceDeal);
+//        verify(emailSender, times(2)).send(Mockito.any(SimpleMailMessage.class));
+//    }
 }

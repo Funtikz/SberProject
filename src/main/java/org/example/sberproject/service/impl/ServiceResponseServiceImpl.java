@@ -53,21 +53,33 @@ public class ServiceResponseServiceImpl  {
 
         User consumer = service.getUser();
         User producer = service.getServiceDeal().getApplicant();
+        String producerFirstName = producer.getFirstName();
+        String producerLastName = producer.getLastName();
+        String producerEmail = producer.getEmail();
+        String producerPhone = producer.getPhoneNumber();
 
-        Hibernate.initialize(service.getServiceDeal());
-        Hibernate.initialize(service.getServiceDeal().getDescriptionService());
-        Hibernate.initialize(service.getOfferedServiceDeal());
-        Hibernate.initialize(service.getOfferedServiceDeal().getDescriptionService());
+        String consumerFirstName = consumer.getFirstName();
+        String consumerLastName = consumer.getLastName();
+        String consumerEmail = consumer.getEmail();
+        String consumerPhone = consumer.getPhoneNumber();
+
+        String serviceDealDescription = service.getServiceDeal().getDescriptionService();
+        String offeredServiceDescription = service.getOfferedServiceDeal().getDescriptionService();
 
         if (newStatus.equals(ResponseStatus.ACCEPTED)) {
-            emailServiceImpl.exchangeContactData(producer, consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
+            emailServiceImpl.exchangeContactData(
+                    producerFirstName, producerLastName, producerEmail, producerPhone,
+                    consumerFirstName, consumerLastName, consumerEmail, consumerPhone,
+                    serviceDealDescription, offeredServiceDescription
+            );
         } else {
-            emailServiceImpl.sendOfferRejectedNotification(consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
+            emailServiceImpl.sendOfferRejectedNotification(
+                    consumer.getEmail(),
+                    service.getServiceDeal().getDescriptionService(),
+                    service.getOfferedServiceDeal().getDescriptionService()
+            );
         }
     }
-
-
-
 
     public List<ServiceResponseDto> getAllMyResponse(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
