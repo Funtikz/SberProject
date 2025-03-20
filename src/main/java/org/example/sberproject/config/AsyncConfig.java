@@ -3,9 +3,11 @@ package org.example.sberproject.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
+@EnableAsync
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class AsyncConfig {
 

@@ -20,6 +20,17 @@
 #    multipart:
 #      max-file-size: 10MB
 #      max-request-size: 10MB
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: 228funtik@gmail.com
+#    password: isne dcyy nvcs bfgq
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
 #
 ##Настройки логирования
 #logging:
@@ -43,7 +54,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto:  create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -54,6 +65,18 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: 228funtik@gmail.com
+    password: isne dcyy nvcs bfgq
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 
 #Настройки логирования
 logging:
@@ -68,4 +91,9 @@ logging:
       max-history: 10
 
 
-
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+  default-produces-media-type: application/json

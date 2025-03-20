@@ -311,10 +311,8 @@ class FavoriteServiceDealServiceImplImplTest {
         when(userServiceImpl.findByPhoneNumber(phoneNumber)).thenReturn(user);
         when(dealService.findById(serviceId)).thenReturn(serviceDeal);
 
-        // Мокаем ситуацию, когда сервис не найден в избранных
         when(repository.findFavoriteServiceDealByUserAndServiceDeal(user, serviceDeal)).thenReturn(Optional.empty());
 
-        // Проверяем, что выбрасывается исключение ServiceNotFoundException
         assertThrows(ServiceNotFoundException.class, () -> favoriteService.deleteFromFavorites(serviceId));
     }
 

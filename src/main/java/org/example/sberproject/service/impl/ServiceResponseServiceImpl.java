@@ -12,7 +12,7 @@ import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.ResponseException;
 import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.ServiceResponseRepository;
-import org.example.sberproject.service.api.ServiceResponseService;
+import org.hibernate.Hibernate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Data
 @Slf4j
-public class ServiceResponseServiceImpl implements ServiceResponseService {
+public class ServiceResponseServiceImpl  {
     private final ServiceResponseRepository repository;
     private final UserServiceImpl userServiceImpl;
     private final ServiceDealServiceImpl dealService;
@@ -36,11 +36,12 @@ public class ServiceResponseServiceImpl implements ServiceResponseService {
     private final EmailServiceImpl emailServiceImpl;
 
 
+
     @Transactional
-    public void updateResponseStatus(Long serviceResponseId, ResponseStatus newStatus){
+    public void updateResponseStatus(Long serviceResponseId, ResponseStatus newStatus) {
         ServiceResponse service = repository.findById(serviceResponseId).orElseThrow(() -> {
-            log.error("Услуги с " + serviceResponseId + "не существует");
-            return new ServiceNotFoundException("Услуги с " + serviceResponseId + "не существует");
+            log.error("Услуги с " + serviceResponseId + " не существует");
+            return new ServiceNotFoundException("Услуги с " + serviceResponseId + " не существует");
         });
 
         if (service.getResponseStatus() != ResponseStatus.PENDING) {
@@ -49,13 +50,18 @@ public class ServiceResponseServiceImpl implements ServiceResponseService {
 
         service.setResponseStatus(newStatus);
         repository.save(service);
+
         User consumer = service.getUser();
         User producer = service.getServiceDeal().getApplicant();
-        if (newStatus.equals(ResponseStatus.ACCEPTED)){
+
+        Hibernate.initialize(service.getServiceDeal());
+        Hibernate.initialize(service.getServiceDeal().getDescriptionService());
+        Hibernate.initialize(service.getOfferedServiceDeal());
+        Hibernate.initialize(service.getOfferedServiceDeal().getDescriptionService());
+
+        if (newStatus.equals(ResponseStatus.ACCEPTED)) {
             emailServiceImpl.exchangeContactData(producer, consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
-            // TODO Добавить изменение категории услуги, чтобы она не показывалась в новом поиске
-        }
-        else {
+        } else {
             emailServiceImpl.sendOfferRejectedNotification(consumer, service.getServiceDeal(), service.getOfferedServiceDeal());
         }
     }

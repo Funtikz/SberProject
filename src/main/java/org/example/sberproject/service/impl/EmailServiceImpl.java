@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.sberproject.entity.ServiceDeal;
 import org.example.sberproject.entity.User;
 import org.example.sberproject.entity.UserRating;
-import org.example.sberproject.service.api.EmailService;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class EmailServiceImpl implements EmailService {
+public class EmailServiceImpl {
 
     private final JavaMailSender emailSender;
 
