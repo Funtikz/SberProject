@@ -12,7 +12,6 @@ import org.example.sberproject.entity.User;
 import org.example.sberproject.exceptions.ResponseException;
 import org.example.sberproject.exceptions.ServiceNotFoundException;
 import org.example.sberproject.repository.ServiceResponseRepository;
-import org.hibernate.Hibernate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
