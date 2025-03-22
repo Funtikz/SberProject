@@ -1,9 +1,7 @@
 package org.example.sberproject.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.sberproject.entity.ServiceDeal;
-import org.example.sberproject.entity.User;
 import org.example.sberproject.entity.UserRating;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
